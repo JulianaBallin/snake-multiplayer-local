@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  Jogo da cobrinha <strong>multiplayer local</strong> para 2 jogadores simultâneos,<br>
-  para <strong>até 4 jogadores simultâneos</strong>, construido sobre a arquitetura do Asteroids Singleplayer.<br>
+  Jogo da cobrinha <strong>multiplayer local</strong> para <strong>até 4 jogadores simultâneos</strong>,<br>
+  construído sobre a arquitetura do Asteroids Singleplayer.<br>
   <em>Atividade 0010 | UEA · Tópicos Especiais I</em>
 </p>
 
@@ -23,13 +23,13 @@
 
 <h2 align="center">Descrição do Projeto</h2>
 
-Este projeto é o clássico jogo da cobrinha reimplementado como **multiplayer local** para dois jogadores no mesmo teclado. A base arquitetural foi herdada do repositório [asteroids_single-player](../asteroids_single-player), mantendo a separação entre domínio (`core/`) e apresentação (`client/`).
+Este projeto é o clássico jogo da cobrinha reimplementado como **multiplayer local** para até quatro jogadores no mesmo teclado. A base arquitetural foi herdada do repositório [asteroids_single-player](../asteroids_single-player), mantendo a separação entre domínio (`core/`) e apresentação (`client/`).
 
 Cada jogador controla uma cobra independente. A cobra cresce ao comer alimentos, e o jogo termina quando uma cobra colide com a parede, com o próprio corpo ou com o corpo da cobra adversária.
 
 ---
 
-<h2 align="center">Mecanica do Jogo</h2>
+<h2 align="center">Mecânica do Jogo</h2>
 
 **Objetivo**
 
@@ -67,15 +67,15 @@ snake-multiplayer-local/
 ├── src/
 │   ├── main.py              # ponto de entrada
 │   ├── core/
-│   │   ├── config.py        # constantes, cores e posicoes iniciais
-│   │   ├── commands.py      # PlayerCommand (direcao por frame)
-│   │   ├── entities.py      # Snake (corpo, direcao, grow) e Food
-│   │   ├── world.py         # estado do jogo, tick, colisoes e pontuacao
+│   │   ├── config.py        # constantes, cores e posições iniciais
+│   │   ├── commands.py      # PlayerCommand (direção por frame)
+│   │   ├── entities.py      # Snake (corpo, direção, crescimento) e Food
+│   │   ├── world.py         # estado do jogo, tick, colisões e pontuação
 │   │   ├── scene.py         # enum SceneState
-│   │   └── utils.py         # celulas livres e posicao aleatoria
+│   │   └── utils.py         # células livres e posição aleatória
 │   └── client/
-│       ├── game.py          # loop principal e transicoes de cena
-│       ├── renderer.py      # renderizacao de entidades e HUD
+│       ├── game.py          # loop principal e transições de cena
+│       ├── renderer.py      # renderização de entidades e HUD
 │       └── controls.py      # mapeamento de teclas para PlayerCommand
 ├── docs/
 │   └── diagrams/
@@ -129,17 +129,17 @@ pygame>=2.5.0
 
 ---
 
-<h2 align="center">Decisoes Arquiteturais</h2>
+<h2 align="center">Decisões Arquiteturais</h2>
 
 A arquitetura segue o mesmo padrão do projeto Asteroids Singleplayer:
 
 | Camada | Pacote | Responsabilidade |
 |--------|--------|------------------|
-| Domínio | `core/` | Toda a logica do jogo: entidades, mundo, colisoes e regras. Sem dependência de pygame. |
-| Apresentação | `client/` | Loop do jogo, renderizacao e mapeamento de input. Depende de pygame e de `core/`. |
+| Domínio | `core/` | Toda a lógica do jogo: entidades, mundo, colisões e regras. Sem dependência de pygame. |
+| Apresentação | `client/` | Loop do jogo, renderização e mapeamento de input. Depende de pygame e de `core/`. |
 | Entrada | `main.py` | Ponto de entrada mínimo que instancia `Game` e chama `run()`. |
 
-O isolamento do domínio permite testar a logica do jogo sem inicializar display ou audio.
+O isolamento do domínio permite testar a lógica do jogo sem inicializar display ou áudio.
 
 ---
 
@@ -149,11 +149,11 @@ Os diagramas estão em `docs/diagrams/` no formato PlantUML (`.puml`).
 
 Para renderizar, use o [PlantUML Online Server](https://www.plantuml.com/plantuml/uml/) ou o plugin PlantUML no VS Code.
 
-| Arquivo | Nivel | Descricao |
+| Arquivo | Nível | Descrição |
 |---------|-------|-----------|
-| `c4_nivel1_contexto.puml` | Nivel 1 | Visao geral: jogadores, sistema e pygame |
-| `c4_nivel2_container.puml` | Nivel 2 | Containers: main, core e client |
-| `c4_nivel3_componente.puml` | Nivel 3 | Componentes internos de core e client |
+| `c4_nivel1_contexto.puml` | Nível 1 | Visão geral: jogadores, sistema e pygame |
+| `c4_nivel2_container.puml` | Nível 2 | Contêineres: main, core e client |
+| `c4_nivel3_componente.puml` | Nível 3 | Componentes internos de core e client |
 
 ---
 
