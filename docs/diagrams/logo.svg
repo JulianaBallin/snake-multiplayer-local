@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160" width="420" height="160">
+  <rect width="420" height="160" fill="#0a0a0a" rx="12"/>
+
+  <!-- Cobra J1 (ciano) -->
+  <rect x="20" y="60" width="26" height="26" rx="5" fill="#009696"/>
+  <rect x="50" y="60" width="26" height="26" rx="5" fill="#00DCDC"/>
+  <rect x="80" y="60" width="26" height="26" rx="5" fill="#00DCDC"/>
+  <rect x="80" y="90" width="26" height="26" rx="5" fill="#00DCDC"/>
+  <rect x="80" y="120" width="26" height="26" rx="5" fill="#00DCDC"/>
+
+  <!-- Cobra J2 (amarelo) -->
+  <rect x="374" y="60" width="26" height="26" rx="5" fill="#969600"/>
+  <rect x="344" y="60" width="26" height="26" rx="5" fill="#DCDC00"/>
+  <rect x="314" y="60" width="26" height="26" rx="5" fill="#DCDC00"/>
+  <rect x="314" y="90" width="26" height="26" rx="5" fill="#DCDC00"/>
+  <rect x="314" y="120" width="26" height="26" rx="5" fill="#DCDC00"/>
+
+  <!-- Comida (vermelho) -->
+  <ellipse cx="210" cy="110" rx="10" ry="10" fill="#C83C3C"/>
+
+  <!-- Titulo SNAKE -->
+  <text x="210" y="68"
+        font-family="Consolas, monospace"
+        font-size="52"
+        font-weight="bold"
+        fill="#F0F0F0"
+        text-anchor="middle"
+        dominant-baseline="middle">SNAKE</text>
+
+  <!-- Subtitulo -->
+  <text x="210" y="98"
+        font-family="Consolas, monospace"
+        font-size="15"
+        fill="#888888"
+        text-anchor="middle"
+        dominant-baseline="middle">MULTIPLAYER LOCAL</text>
+</svg>
