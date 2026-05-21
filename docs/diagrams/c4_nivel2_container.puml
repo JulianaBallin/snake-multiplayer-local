@@ -1,0 +1,23 @@
+@startuml c4_nivel2_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Container - Snake Multiplayer Local (Nivel 2)
+
+Person(jogadores, "Jogadores (J1 e J2)", "Dois jogadores no mesmo teclado")
+
+System_Boundary(sistema, "Snake Multiplayer Local") {
+    Container(main, "main.py", "Python", "Ponto de entrada da aplicacao:\ninstancia e executa Game")
+    Container(client, "client/", "Python / pygame", "Camada de apresentacao:\nloop do jogo, renderizacao e controles")
+    Container(core, "core/", "Python", "Dominio do jogo:\nlogica, entidades, mundo e configuracao")
+}
+
+System_Ext(pygame, "pygame", "Renderizacao 2D, captura de input\ne gerenciamento de janela")
+
+Rel(jogadores, main, "Executa", "linha de comando")
+Rel(main, client, "Instancia e executa", "Game().run()")
+Rel(client, core, "Le e atualiza", "World, PlayerCommand")
+Rel(client, pygame, "Desenha e captura input", "API pygame")
+
+@enduml

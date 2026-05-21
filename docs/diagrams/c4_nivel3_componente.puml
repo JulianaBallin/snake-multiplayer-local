@@ -1,0 +1,34 @@
+@startuml c4_nivel3_componente
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Componente - Snake Multiplayer Local (Nivel 3)
+
+Container_Boundary(client_container, "client/") {
+    Component(game, "Game", "Python class", "Orquestra o loop principal:\ninput -> update -> draw e\ngerencia transicoes de cena")
+    Component(renderer, "Renderer", "Python class", "Desenha grade, cobras, comidas,\nHUD e telas de menu e fim de jogo")
+    Component(controls, "InputMapper", "Python class", "Converte eventos de teclado em\nPlayerCommand por jogador")
+}
+
+Container_Boundary(core_container, "core/") {
+    Component(world, "World", "Python class", "Estado do jogo: cobras, comidas,\npontuacao, tick e regras de colisao")
+    Component(entities, "Snake / Food", "Python classes", "Snake: corpo (deque), direcao, grow.\nFood: posicao no tabuleiro")
+    Component(commands, "PlayerCommand", "Python dataclass", "Comando de direcao imutavel\nentregue pelo jogador a cada frame")
+    Component(config, "config", "Python module", "Constantes: tamanho da grade,\nvelocidade, cores e posicoes iniciais")
+    Component(scene, "SceneState", "Python enum", "Estados de cena:\nMENU, PLAY, GAME_OVER")
+    Component(utils, "utils", "Python module", "Funcoes auxiliares:\ncelulas livres e posicao aleatoria")
+}
+
+Rel(game, controls, "Delega eventos de teclado")
+Rel(game, renderer, "Solicita renderizacao por cena")
+Rel(game, world, "Envia comandos e le estado")
+Rel(controls, commands, "Produz")
+Rel(world, entities, "Gerencia ciclo de vida")
+Rel(world, config, "Le constantes de jogo")
+Rel(world, utils, "Usa para spawnar comida")
+Rel(renderer, entities, "Le para desenhar cobras e comidas")
+Rel(renderer, config, "Le cores e dimensoes")
+Rel(game, scene, "Gerencia transicoes de cena")
+
+@enduml

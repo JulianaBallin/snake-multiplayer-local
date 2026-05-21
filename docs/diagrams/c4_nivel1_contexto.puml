@@ -1,0 +1,19 @@
+@startuml c4_nivel1_contexto
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contexto - Snake Multiplayer Local (Nivel 1)
+
+Person(j1, "Jogador 1", "Controla a cobra ciano\nusando as teclas WASD")
+Person(j2, "Jogador 2", "Controla a cobra amarela\nusando as setas direcionais")
+
+System(snake, "Snake Multiplayer Local", "Jogo da cobrinha para dois\njogadores no mesmo teclado,\ndesenvolvido em Python com pygame")
+
+System_Ext(pygame, "pygame", "Biblioteca de jogos 2D para Python:\njanela, captura de input e renderizacao")
+
+Rel(j1, snake, "Joga", "Teclado (WASD)")
+Rel(j2, snake, "Joga", "Teclado (Setas)")
+Rel(snake, pygame, "Usa", "API pygame")
+
+@enduml
