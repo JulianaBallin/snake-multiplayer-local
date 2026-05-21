@@ -24,10 +24,9 @@ class World:
         self.game_over = False
         self.winner: PlayerId | None = None
 
-        self.snakes[1] = Snake(1, C.P1_START, C.P1_DIR, C.START_LENGTH)
-        self.snakes[2] = Snake(2, C.P2_START, C.P2_DIR, C.START_LENGTH)
-        self.scores[1] = 0
-        self.scores[2] = 0
+        for pid, (start, direction) in C.PLAYER_STARTS.items():
+            self.snakes[pid] = Snake(pid, start, direction, C.START_LENGTH)
+            self.scores[pid] = 0
 
         for _ in range(C.FOOD_COUNT):
             self._spawnar_comida()

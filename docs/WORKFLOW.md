@@ -1,13 +1,13 @@
 # SNAKE MULTIPLAYER LOCAL -- WORKFLOW DE DESENVOLVIMENTO
 
-**Versão:** 1.0
+**Versão:** 1.1
 **Data:** 2026-05-21
 
 ---
 
 ## 1. Objetivo
 
-Guiar o desenvolvimento do Snake Multiplayer Local por meio de Pull Requests curtos, seguros e verificáveis, garantindo qualidade técnica e rastreabilidade. O trabalho é dividido entre **3 integrantes**, cada um responsável por um conjunto de atividades coeso.
+Guiar o desenvolvimento do Snake Multiplayer Local por meio de Pull Requests curtos, seguros e verificáveis, garantindo qualidade técnica e rastreabilidade. O trabalho é dividido entre **3 integrantes**, cada um responsável por um conjunto coeso de atividades e por um diagrama C4.
 
 ---
 
@@ -23,41 +23,56 @@ Guiar o desenvolvimento do Snake Multiplayer Local por meio de Pull Requests cur
 
 ## 3. Divisão de Atividades
 
-### Integrante 1 -- Ana Beatriz Maciel Nunes
+### Juliana Ballin Lima -- Infraestrutura base e Diagrama C4 Nivel 2 (Container)
 
-Responsável pela **camada de domínio (core/)** e mecânica principal.
-
-| PR | Branch | Escopo |
-|----|--------|--------|
-| 1 | `feat/core-config-entities` | `config.py`, `commands.py`, `entities.py`, `scene.py`, `utils.py` |
-| 2 | `feat/core-world-logica` | `world.py`: tick, colisoes, pontuacao e spawn de comida |
-| 3 | `feat/mecanica-power-up` | Mecânica inédita: item especial (power-up) no tabuleiro |
-
-### Integrante 2 -- Fernando Luiz Da Silva Freire
-
-Responsável pela **camada de apresentação (client/)** e loop do jogo.
+Responsável pela **estrutura do projeto, camada de domínio e documentação base**. Implementa primeiro para que Fernando e Ana possam partir de uma base funcional.
 
 | PR | Branch | Escopo |
 |----|--------|--------|
-| 4 | `feat/client-controls` | `controls.py`: InputMapper para J1 (WASD) e J2 (Setas) |
-| 5 | `feat/client-renderer` | `renderer.py`: grade, cobras, comidas, HUD |
-| 6 | `feat/client-game-loop` | `game.py`: loop principal e transicoes de cena |
+| 1 | `feat/estrutura-base` | `main.py`, `requirements.txt`, `.gitignore`, estrutura de pastas (`src/core/`, `src/client/`, `docs/`) |
+| 2 | `feat/core-infra` | `core/config.py`, `core/commands.py`, `core/scene.py`, `core/utils.py` |
+| 3 | `feat/core-entidades-mundo` | `core/entities.py` (Snake, Food), `core/world.py` (tick, colisoes, pontuacao) |
+| 4 | `chore/docs-readme-nivel2` | `README.md`, `LICENSE`, `docs/WORKFLOW.md`, `docs/diagrams/c4_nivel2_container.puml` |
 
-### Integrante 3 -- Juliana Ballin Lima
+### Fernando Luiz Da Silva Freire -- Camada de apresentacao e Diagrama C4 Nivel 1 (Contexto)
 
-Responsável pela **infraestrutura, documentação e mecânica extra**.
+Responsável pela **camada client/**: leitura de input, renderizacao e loop do jogo. Parte dos arquivos de Juliana.
 
 | PR | Branch | Escopo |
 |----|--------|--------|
-| 7 | `feat/estrutura-base` | `main.py`, `requirements.txt`, `.gitignore`, estrutura de pastas |
-| 8 | `chore/readme-c4-docs` | `README.md`, `docs/diagrams/*.puml`, `docs/WORKFLOW.md`, `LICENSE` |
-| 9 | `feat/mecanica-velocidade` | Mecânica inédita: aumento progressivo de velocidade por pontuação |
+| 5 | `feat/client-controls` | `client/controls.py`: InputMapper para 4 jogadores (WASD, Setas, IJKL, Numpad) |
+| 6 | `feat/client-renderer` | `client/renderer.py`: grade, cobras, comidas, HUD e telas de menu e fim de jogo |
+| 7 | `feat/client-game-loop` | `client/game.py`: loop principal, transicoes de cena e orchestracao |
+| 8 | `chore/docs-nivel1` | `docs/diagrams/c4_nivel1_contexto.puml` (Diagrama C4 Nivel 1) |
+
+### Ana Beatriz Maciel Nunes -- Mecanica inedita e Diagrama C4 Nivel 3 (Componente)
+
+Responsável por uma **mecânica inédita** no jogo e pelo diagrama de componentes mais detalhado.
+
+| PR | Branch | Escopo |
+|----|--------|--------|
+| 9 | `feat/mecanica-ana` | Mecânica inédita a definir (ex.: power-up de velocidade, escudo temporário, teletransporte) |
+| 10 | `chore/docs-nivel3` | `docs/diagrams/c4_nivel3_componente.puml` (Diagrama C4 Nivel 3) |
 
 ---
 
-## 4. Fluxo Operacional
+## 4. Ordem de Implementacao Sugerida
 
-### 4.1 Preparação
+```
+PR 1 (Juliana) -> PR 2 (Juliana) -> PR 3 (Juliana) -> PR 4 (Juliana)
+                                                              |
+                                          +-------------------+-------------------+
+                                          |                                       |
+                               PR 5-8 (Fernando)                       PR 9-10 (Ana)
+```
+
+Fernando pode iniciar PR 5 assim que PR 3 for mesclado (os arquivos `core/` já estao disponíveis). Ana pode iniciar PR 9 a qualquer momento após PR 3.
+
+---
+
+## 5. Fluxo Operacional
+
+### 5.1 Preparacao
 
 ```bash
 git checkout main
@@ -65,30 +80,29 @@ git pull
 git checkout -b feat/nome-da-atividade
 ```
 
-### 4.2 Desenvolvimento
+### 5.2 Desenvolvimento
 
 - Implementar apenas o escopo definido para o PR.
-- Manter a separação `core/` (logica) e `client/` (apresentação).
+- Manter a separacao `core/` (logica) e `client/` (apresentacao).
 - Centralizar novas constantes em `core/config.py`.
-- Não introduzir dependências sem aprovação da equipe.
+- Nao introduzir dependências sem aprovacao da equipe.
 
-### 4.3 Validação local
+### 5.3 Validacao local
 
 ```bash
-cd snake-multiplayer-local
 python src/main.py
 ```
 
 Testar manualmente:
 
-- Jogo inicia no menu.
-- Cobras se movem com WASD e Setas.
-- Colisão com parede e corpo funciona.
+- Jogo inicia no menu com controles de 4 jogadores.
+- Cada cobra se move com seus controles (WASD, Setas, IJKL, Numpad).
+- Colisao com parede, corpo próprio e adversario funciona.
 - Alimento aparece e cobra cresce ao comer.
-- Placar atualiza corretamente.
-- Tela de fim de jogo exibe vencedor e pontuação.
+- Placar atualiza corretamente para todos os 4 jogadores.
+- Tela de fim de jogo exibe vencedor e placar completo.
 
-### 4.4 Publicação
+### 5.4 Publicacao
 
 ```bash
 git add <arquivos-relevantes>
@@ -98,13 +112,13 @@ git push origin feat/nome-da-atividade
 
 ---
 
-## 5. Estrutura do Pull Request
+## 6. Estrutura do Pull Request
 
-### 5.1 Titulo
+### 6.1 Titulo
 
 Formato: `feat: descricao` / `fix: descricao` / `chore: descricao`
 
-### 5.2 Descricao
+### 6.2 Descricao
 
 Todo PR deve conter:
 
@@ -115,7 +129,7 @@ Todo PR deve conter:
 
 ---
 
-## 6. Checklist de Revisao
+## 7. Checklist de Revisao
 
 ### Arquitetura
 
@@ -132,12 +146,12 @@ Todo PR deve conter:
 ### Funcionalidade
 
 - [ ] Jogo executa sem erros (`python src/main.py`)
-- [ ] Mecanica testada manualmente
+- [ ] Mecanica testada manualmente com 2+ jogadores
 - [ ] Sem regressoes visíveis
 
 ---
 
-## 7. Sincronizacao Pos-Merge
+## 8. Sincronizacao Pos-Merge
 
 Apos o PR ser aprovado e mesclado:
 
@@ -150,12 +164,12 @@ git status
 
 ---
 
-## 8. Convencao de Nomenclatura de Commits
+## 9. Convencao de Nomenclatura de Commits
 
 ```
-feat(config): adicionar constantes de velocidade progressiva
+feat(config): adicionar constantes de 4 jogadores
 fix(world): corrigir colisao cabeca a cabeca simultanea
-chore(docs): atualizar diagrama C4 nivel 2
+chore(docs): adicionar diagrama C4 nivel 2 container
 ```
 
 Commits devem ser pequenos, descritivos e alinhados ao objetivo do PR.

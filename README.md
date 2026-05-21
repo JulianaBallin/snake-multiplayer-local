@@ -4,7 +4,7 @@
 
 <p align="center">
   Jogo da cobrinha <strong>multiplayer local</strong> para 2 jogadores simultâneos,<br>
-  construido sobre a arquitetura do Asteroids Singleplayer em Python com pygame.<br>
+  para <strong>até 4 jogadores simultâneos</strong>, construido sobre a arquitetura do Asteroids Singleplayer.<br>
   <em>Atividade 0010 | UEA · Tópicos Especiais I</em>
 </p>
 
@@ -53,6 +53,8 @@ Comer o maior número de alimentos possível sem colidir com paredes, com o pró
 |---------|------|-------|----------|---------|
 | **J1 (Ciano)** | `W` | `S` | `A` | `D` |
 | **J2 (Amarelo)** | `↑` | `↓` | `←` | `→` |
+| **J3 (Verde)** | `I` | `K` | `J` | `L` |
+| **J4 (Vermelho)** | `Num8` | `Num2` | `Num4` | `Num6` |
 
 `ESC` encerra o jogo a qualquer momento.
 
@@ -157,7 +159,7 @@ Para renderizar, use o [PlantUML Online Server](https://www.plantuml.com/plantum
 
 <h2 align="center">Limitações</h2>
 
-- Apenas 2 jogadores simultâneos no mesmo teclado.
+- Até 4 jogadores simultâneos no mesmo teclado.
 - Sem suporte a joystick ou controle externo.
 - Sem salvamento de pontuação entre partidas.
 
