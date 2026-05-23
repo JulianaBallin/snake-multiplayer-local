@@ -13,20 +13,20 @@ _DEADZONE = 0.5
 
 KEYMAPS: dict[int, dict[int, tuple[int, int]]] = {
     1: {
-        pg.K_w: _CIMA, pg.K_s: _BAIXO,
-        pg.K_a: _ESQUERDA, pg.K_d: _DIREITA,
-    },
-    2: {
-        pg.K_UP: _CIMA, pg.K_DOWN: _BAIXO,
-        pg.K_LEFT: _ESQUERDA, pg.K_RIGHT: _DIREITA,
-    },
-    3: {
         pg.K_i: _CIMA, pg.K_k: _BAIXO,
         pg.K_j: _ESQUERDA, pg.K_l: _DIREITA,
     },
-    4: {
+    2: {
         pg.K_KP8: _CIMA, pg.K_KP2: _BAIXO,
         pg.K_KP4: _ESQUERDA, pg.K_KP6: _DIREITA,
+    },
+    3: {
+        pg.K_w: _CIMA, pg.K_s: _BAIXO,
+        pg.K_a: _ESQUERDA, pg.K_d: _DIREITA,
+    },
+    4: {
+        pg.K_UP: _CIMA, pg.K_DOWN: _BAIXO,
+        pg.K_LEFT: _ESQUERDA, pg.K_RIGHT: _DIREITA,
     },
 }
 
@@ -58,9 +58,7 @@ class InputMapper:
     def __init__(self) -> None:
         pg.joystick.init()
         self._joysticks: dict[int, pg.joystick.JoystickType] = {}
-        self._buffer: dict[int, tuple[int, int] | None] = {
-            pid: None for pid in KEYMAPS
-        }
+        self._buffer: dict[int, tuple[int, int] | None] = {pid: None for pid in KEYMAPS}
         self._inicializar_joysticks()
 
     def processar_evento(self, event: pg.event.Event) -> None:
@@ -69,12 +67,17 @@ class InputMapper:
 
     def gerar_comandos(self) -> dict[int, PlayerCommand]:
         self._processar_analogicos()
-        comandos = {
-            pid: PlayerCommand(direction=self._buffer[pid])
-            for pid in KEYMAPS
-        }
+        comandos = {pid: PlayerCommand(direction=self._buffer[pid]) for pid in KEYMAPS}
         self._buffer = {pid: None for pid in KEYMAPS}
         return comandos
+
+    def status_joysticks(self) -> dict[int, str | None]:
+        status: dict[int, str | None] = {pid: None for pid in KEYMAPS}
+        for joy_id, joy in self._joysticks.items():
+            slot = self._slot_do_joystick(joy_id)
+            if slot is not None:
+                status[slot] = joy.get_name()
+        return status
 
     def _processar_teclado(self, event: pg.event.Event) -> None:
         if event.type != pg.KEYDOWN:
@@ -99,11 +102,9 @@ class InputMapper:
             joy.init()
             self._joysticks[event.device_index] = joy
             return
-
         if event.type == pg.JOYDEVICEREMOVED:
             self._joysticks.pop(event.instance_id, None)
             return
-
         if event.type == pg.JOYHATMOTION:
             pid = self._slot_do_joystick(event.joy)
             if pid is None:
