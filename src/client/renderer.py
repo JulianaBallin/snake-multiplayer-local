@@ -1,133 +1,246 @@
-"""Renderizacao do jogo Snake usando pygame."""
+"""Renderizacao das cenas do jogo."""
 
 import pygame as pg
 
 from core import config as C
 from core.entities import Food, Snake
-from core.scene import SceneState
+
+_MARGEM_CORPO = 2
+_MARGEM_COMIDA = 4
+_RAIO_BORDA = 5
+_RAIO_PAINEL = 8
+_COR_PAINEL_BG = (12, 12, 12)
+_PAINEL_W = 372
+_PAINEL_H = 184
+_PAINEL_GAP = 24
+
+_LAYOUTS: dict[int, list[tuple[str, int, int]]] = {
+    1: [("I", 1, 0), ("J", 0, 1), ("K", 1, 1), ("L", 2, 1)],
+    2: [("8", 1, 0), ("4", 0, 1), ("2", 1, 2), ("6", 2, 1)],
+    3: [("W", 1, 0), ("A", 0, 1), ("S", 1, 1), ("D", 2, 1)],
+    4: [("\u2191", 1, 0), ("\u2190", 0, 1), ("\u2193", 1, 1), ("\u2192", 2, 1)],
+}
+
+_NOME_COR = {1: "AZUL", 2: "AMARELO", 3: "VERDE", 4: "VERMELHO"}
 
 
 class Renderer:
-    """Desenha cenas e entidades sem acoplar regras do jogo."""
+    """Desenha o estado do jogo na superficie pygame."""
 
     def __init__(
         self,
-        screen: pg.Surface,
-        fonts: dict[str, pg.font.Font],
+        tela: pg.Surface,
+        fontes: dict[str, pg.font.Font],
     ) -> None:
-        self.screen = screen
-        self.font = fonts["font"]
-        self.big = fonts["big"]
+        self._tela = tela
+        self._fonte = fontes["normal"]
+        self._fonte_grande = fontes["grande"]
+        self._fonte_pequena = fontes["pequena"]
 
-    def clear(self) -> None:
-        self.screen.fill(C.BLACK)
+    def limpar(self) -> None:
+        self._tela.fill(C.BLACK)
 
-    def draw_grid(self) -> None:
-        for c in range(C.COLS + 1):
-            x = c * C.CELL
-            pg.draw.line(self.screen, C.GRID_COLOR, (x, 0), (x, C.HEIGHT))
-        for r in range(C.ROWS + 1):
-            y = r * C.CELL
-            pg.draw.line(self.screen, C.GRID_COLOR, (0, y), (C.WIDTH, y))
-
-    def draw_world(self, world: object) -> None:
-        self.draw_grid()
+    def desenhar_mundo(self, world: object) -> None:
+        self._desenhar_grade()
         for food in world.foods:
-            self._draw_food(food)
+            self._desenhar_comida(food)
         for snake in world.snakes.values():
             if snake.alive:
-                self._draw_snake(snake)
+                self._desenhar_cobra(snake)
 
-    def _draw_food(self, food: Food) -> None:
-        col, row = food.pos
-        rect = pg.Rect(
-            col * C.CELL + 3,
-            row * C.CELL + 3,
-            C.CELL - 6,
-            C.CELL - 6,
-        )
-        pg.draw.ellipse(self.screen, C.FOOD_COLOR, rect)
-
-    def _draw_snake(self, snake: Snake) -> None:
-        cor = C.PLAYER_COLORS[snake.player_id]
-        cor_cabeca = C.PLAYER_HEAD_COLORS[snake.player_id]
-        for i, (col, row) in enumerate(snake.body):
-            rect = pg.Rect(
-                col * C.CELL + 1,
-                row * C.CELL + 1,
-                C.CELL - 2,
-                C.CELL - 2,
-            )
-            c = cor_cabeca if i == 0 else cor
-            pg.draw.rect(self.screen, c, rect, border_radius=4)
-
-    def draw_hud(self, world: object) -> None:
-        # HUD no topo: 4 secoes de largura igual
-        secao = C.WIDTH // 4
+    def desenhar_hud(self, world: object) -> None:
+        sec = C.WIDTH // 4
         for pid in range(1, 5):
             snake = world.snakes.get(pid)
-            score = world.scores.get(pid, 0)
-            vivo = snake.alive if snake else False
-            status = "VIVO" if vivo else "MORTO"
-            cor = C.PLAYER_COLORS[pid]
-            texto = f"J{pid} {score:04d} [{status}]"
-            label = self.font.render(texto, True, cor)
-            x = (pid - 1) * secao + 6
-            self.screen.blit(label, (x, 5))
+            pontos = world.scores.get(pid, 0)
+            status = "VIVO" if (snake and snake.alive) else "MORTO"
+            label = self._fonte.render(
+                f"J{pid} {pontos:04d} [{status}]", True, C.PLAYER_COLORS[pid]
+            )
+            self._tela.blit(label, ((pid - 1) * sec + 6, 5))
 
-    def draw_menu(self) -> None:
-        title = self.big.render("SNAKE", True, C.WHITE)
-        sub = self.font.render(
-            "Pressione qualquer tecla para iniciar",
-            True,
-            C.WHITE,
-        )
+    def desenhar_menu(self, status_joy: dict[int, str | None]) -> None:
         cx = C.WIDTH // 2
-        self.screen.blit(title, (cx - title.get_width() // 2, 160))
-        self.screen.blit(sub, (cx - sub.get_width() // 2, 260))
 
-        controles = [
-            ("J1 (Ciano):", "W A S D"),
-            ("J2 (Amarelo):", "Setas"),
-            ("J3 (Verde):", "I J K L"),
-            ("J4 (Vermelho):", "Num 8 4 2 6"),
+        grid_w = _PAINEL_W * 2 + _PAINEL_GAP
+        grid_h = _PAINEL_H * 2 + _PAINEL_GAP
+        grid_x = (C.WIDTH - grid_w) // 2
+        grid_y = (C.HEIGHT - grid_h) // 2
+
+        titulo = self._fonte_grande.render("SNAKE", True, C.WHITE)
+        self._tela.blit(titulo, (cx - titulo.get_width() // 2, grid_y - 108))
+
+        sub = self._fonte.render(
+            "MULTIPLAYER LOCAL  \u2014  4 JOGADORES", True, (140, 140, 140)
+        )
+        self._tela.blit(sub, (cx - sub.get_width() // 2, grid_y - 48))
+
+        col2 = grid_x + _PAINEL_W + _PAINEL_GAP
+        row2 = grid_y + _PAINEL_H + _PAINEL_GAP
+        posicoes = [
+            (1, grid_x, grid_y),
+            (2, col2, grid_y),
+            (3, grid_x, row2),
+            (4, col2, row2),
         ]
-        y = 310
-        for nome, teclas in controles:
-            pid = int(nome[1])
-            cor = C.PLAYER_COLORS[pid]
-            label = self.font.render(f"{nome}  {teclas}", True, cor)
-            self.screen.blit(label, (cx - label.get_width() // 2, y))
-            y += 28
+        for pid, px, py in posicoes:
+            self._desenhar_painel(pid, px, py, status_joy.get(pid))
 
-    def draw_game_over(self, world: object) -> None:
+        total = sum(1 for v in status_joy.values() if v is not None)
+        if total:
+            txt_joy = f"[ {total} joystick(s) detectado(s) ]"
+            cor_joy = (80, 200, 80)
+        else:
+            txt_joy = "[ Nenhum joystick detectado  \u2014  use o teclado ]"
+            cor_joy = (90, 90, 90)
+
+        lbl_joy = self._fonte.render(txt_joy, True, cor_joy)
+        lbl_start = self._fonte.render(
+            "Pressione qualquer tecla para iniciar", True, C.WHITE
+        )
+        rodape_y = grid_y + grid_h + 28
+        self._tela.blit(lbl_joy, (cx - lbl_joy.get_width() // 2, rodape_y))
+        self._tela.blit(lbl_start, (cx - lbl_start.get_width() // 2, rodape_y + 37))
+
+    def desenhar_fim_de_jogo(self, world: object) -> None:
+        cx = C.WIDTH // 2
         vencedor = getattr(world, "winner", None)
-        if vencedor is not None:
-            msg = f"JOGADOR {vencedor} VENCEU!"
+
+        if vencedor:
+            cor_v = C.PLAYER_COLORS[vencedor]
+            faixa = pg.Surface((C.WIDTH, 88), pg.SRCALPHA)
+            faixa.fill((cor_v[0], cor_v[1], cor_v[2], 22))
+            self._tela.blit(faixa, (0, 36))
+
+        titulo = self._fonte_grande.render("FIM DE JOGO", True, C.WHITE)
+        self._tela.blit(titulo, (cx - titulo.get_width() // 2, 36))
+
+        if vencedor:
+            msg = f"JOGADOR  {vencedor}  VENCEU!"
             cor_msg = C.PLAYER_COLORS[vencedor]
         else:
-            msg = "EMPATE!"
+            msg = "E M P A T E"
             cor_msg = C.WHITE
 
-        title = self.big.render("FIM DE JOGO", True, C.WHITE)
-        lbl_winner = self.font.render(msg, True, cor_msg)
-        lbl_restart = self.font.render(
-            "Pressione qualquer tecla para reiniciar",
-            True,
-            C.WHITE,
+        lbl_v = self._fonte.render(msg, True, cor_msg)
+        self._tela.blit(lbl_v, (cx - lbl_v.get_width() // 2, 146))
+
+        y = 198
+        pg.draw.line(self._tela, (60, 60, 60), (cx - 180, y), (cx + 180, y), 1)
+        y += 14
+
+        for pid in sorted(world.scores):
+            pontos = world.scores[pid]
+            cor = C.PLAYER_COLORS[pid]
+            eh_venc = pid == vencedor
+
+            if eh_venc:
+                hl = pg.Surface((360, 32), pg.SRCALPHA)
+                hl.fill((cor[0], cor[1], cor[2], 35))
+                self._tela.blit(hl, (cx - 180, y - 3))
+
+            sufixo = "  \u25c4 VENCEDOR" if eh_venc else ""
+            linha = self._fonte.render(
+                f"J{pid}:  {pontos:04d} pts{sufixo}", True, cor
+            )
+            self._tela.blit(linha, (cx - linha.get_width() // 2, y))
+            y += 34
+
+        pg.draw.line(self._tela, (60, 60, 60), (cx - 180, y + 2), (cx + 180, y + 2), 1)
+
+        lbl_r = self._fonte.render(
+            "Pressione qualquer tecla para reiniciar", True, (150, 150, 150)
         )
+        self._tela.blit(lbl_r, (cx - lbl_r.get_width() // 2, y + 22))
+
+    def desenhar_pausa(self) -> None:
+        overlay = pg.Surface((C.WIDTH, C.HEIGHT), pg.SRCALPHA)
+        overlay.fill((0, 0, 0, 150))
+        self._tela.blit(overlay, (0, 0))
 
         cx = C.WIDTH // 2
-        self.screen.blit(title, (cx - title.get_width() // 2, 140))
-        self.screen.blit(lbl_winner, (cx - lbl_winner.get_width() // 2, 230))
+        cy = C.HEIGHT // 2
 
-        # Placar de todos os jogadores
-        y = 280
-        for pid in sorted(world.scores.keys()):
-            score = world.scores[pid]
-            cor = C.PLAYER_COLORS[pid]
-            lbl = self.font.render(f"J{pid}: {score:04d} pts", True, cor)
-            self.screen.blit(lbl, (cx - lbl.get_width() // 2, y))
-            y += 28
+        titulo = self._fonte_grande.render("PAUSADO", True, C.WHITE)
+        sub = self._fonte.render("Pressione ESC para continuar", True, (170, 170, 170))
 
-        self.screen.blit(lbl_restart, (cx - lbl_restart.get_width() // 2, y + 20))
+        self._tela.blit(titulo, (cx - titulo.get_width() // 2, cy - 55))
+        self._tela.blit(sub, (cx - sub.get_width() // 2, cy + 25))
+
+    def _desenhar_painel(
+        self, pid: int, x: int, y: int, joy_nome: str | None
+    ) -> None:
+        cor = C.PLAYER_COLORS[pid]
+        w, h = _PAINEL_W, _PAINEL_H
+
+        pg.draw.rect(self._tela, _COR_PAINEL_BG, (x, y, w, h), border_radius=_RAIO_PAINEL)
+        pg.draw.rect(self._tela, cor, (x, y, w, h), width=2, border_radius=_RAIO_PAINEL)
+
+        cab = self._fonte.render(
+            f"\u25cf JOGADOR {pid}  \u2014  {_NOME_COR[pid]}", True, cor
+        )
+        self._tela.blit(cab, (x + 12, y + 10))
+
+        pg.draw.line(self._tela, cor, (x + 8, y + 37), (x + w - 8, y + 37), 1)
+
+        tec = self._fonte_pequena.render("TECLADO:", True, (140, 140, 140))
+        self._tela.blit(tec, (x + 12, y + 45))
+
+        self._desenhar_mini_teclado(pid, x + 100, y + 58)
+
+        if joy_nome:
+            j_txt = f">> {joy_nome[:32]}"
+            j_cor = (80, 210, 80)
+        else:
+            j_txt = "Joystick nao conectado"
+            j_cor = (75, 75, 75)
+
+        jlbl = self._fonte_pequena.render(j_txt, True, j_cor)
+        self._tela.blit(jlbl, (x + 12, y + 160))
+
+    def _desenhar_mini_teclado(self, pid: int, ox: int, oy: int) -> None:
+        cor = C.PLAYER_COLORS[pid]
+        tam, esp = 26, 30
+
+        for label, col, row in _LAYOUTS[pid]:
+            rx = ox + col * esp
+            ry = oy + row * esp
+            rect = pg.Rect(rx, ry, tam, tam)
+            pg.draw.rect(self._tela, (35, 35, 35), rect, border_radius=5)
+            pg.draw.rect(self._tela, cor, rect, width=1, border_radius=5)
+            txt = self._fonte_pequena.render(label, True, C.WHITE)
+            self._tela.blit(txt, (
+                rx + tam // 2 - txt.get_width() // 2,
+                ry + tam // 2 - txt.get_height() // 2,
+            ))
+
+    def _desenhar_grade(self) -> None:
+        for col in range(C.COLS + 1):
+            pg.draw.line(self._tela, C.GRID_COLOR,
+                         (col * C.CELL, 0), (col * C.CELL, C.HEIGHT))
+        for row in range(C.ROWS + 1):
+            pg.draw.line(self._tela, C.GRID_COLOR,
+                         (0, row * C.CELL), (C.WIDTH, row * C.CELL))
+
+    def _desenhar_cobra(self, snake: Snake) -> None:
+        cor_corpo = C.PLAYER_COLORS[snake.player_id]
+        cor_cabeca = C.PLAYER_HEAD_COLORS[snake.player_id]
+        for i, (col, row) in enumerate(snake.body):
+            cor = cor_cabeca if i == 0 else cor_corpo
+            rect = pg.Rect(
+                col * C.CELL + _MARGEM_CORPO,
+                row * C.CELL + _MARGEM_CORPO,
+                C.CELL - _MARGEM_CORPO * 2,
+                C.CELL - _MARGEM_CORPO * 2,
+            )
+            pg.draw.rect(self._tela, cor, rect, border_radius=_RAIO_BORDA)
+
+    def _desenhar_comida(self, food: Food) -> None:
+        col, row = food.pos
+        rect = pg.Rect(
+            col * C.CELL + _MARGEM_COMIDA,
+            row * C.CELL + _MARGEM_COMIDA,
+            C.CELL - _MARGEM_COMIDA * 2,
+            C.CELL - _MARGEM_COMIDA * 2,
+        )
+        pg.draw.ellipse(self._tela, C.FOOD_COLOR, rect)

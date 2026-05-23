@@ -1,9 +1,4 @@
-"""Loop do jogo e transicao de cenas.
-
-- InputMapper converte eventos do teclado em PlayerCommand.
-- World atualiza a simulacao e gera eventos para Game reagir.
-- Game gerencia transicoes de cena e renderizacao.
-"""
+"""Loop principal do jogo e transicoes de cena."""
 
 import sys
 
@@ -17,77 +12,100 @@ from client.renderer import Renderer
 
 
 class Game:
-    """Orquestra input -> update -> draw."""
 
     def __init__(self) -> None:
         pg.init()
-        self.screen = pg.display.set_mode((C.WIDTH, C.HEIGHT))
+        self._tela = pg.display.set_mode((C.WIDTH, C.HEIGHT))
+        self._relogio = pg.time.Clock()
+        self._rodando = True
+        self._pausado = False
+
         pg.display.set_caption("Snake Multiplayer Local")
-        self.clock = pg.time.Clock()
-        self.running = True
 
-        font = pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE)
-        big = pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_BIG)
-        self.renderer = Renderer(self.screen, fonts={"font": font, "big": big})
+        fontes = {
+            "normal": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE),
+            "grande": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_BIG),
+            "pequena": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_SMALL),
+        }
 
-        self.scene = SceneState.MENU
-        self.world = World()
-        self.input_mapper = InputMapper()
+        self._renderer = Renderer(self._tela, fontes)
+        self._input = InputMapper()
+        self._world = World()
+        self._cena = SceneState.MENU
 
-    def run(self) -> None:
-        while self.running:
-            dt = self.clock.tick(C.FPS) / 1000.0
-            self._handle_events()
-            self._update(dt)
-            self._draw()
+    def rodar(self) -> None:
+        while self._rodando:
+            dt = self._relogio.tick(C.FPS) / 1000.0
+            self._processar_eventos()
+            self._atualizar(dt)
+            self._renderizar()
         pg.quit()
 
-    def _handle_events(self) -> None:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                self._quit()
+    def _processar_eventos(self) -> None:
+        for evento in pg.event.get():
+            if evento.type == pg.QUIT:
+                self._encerrar()
 
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                self._quit()
-
-            if self.scene == SceneState.MENU:
-                if event.type == pg.KEYDOWN:
-                    self.scene = SceneState.PLAY
+            if evento.type == pg.KEYDOWN and evento.key == pg.K_ESCAPE:
+                self._pausar_ou_sair()
                 continue
 
-            if self.scene == SceneState.GAME_OVER:
-                if event.type == pg.KEYDOWN:
-                    self.world.reset()
-                    self.scene = SceneState.PLAY
+            if evento.type == pg.JOYBUTTONDOWN:
+                self._input.processar_evento(evento)
+
+            if self._input.consumir_pausa():
+                self._pausar_ou_sair()
                 continue
 
-            if self.scene == SceneState.PLAY:
-                self.input_mapper.handle_event(event)
+            if self._cena == SceneState.MENU:
+                if evento.type == pg.KEYDOWN:
+                    self._cena = SceneState.PLAY
+                    self._pausado = False
+                continue
 
-    def _update(self, dt: float) -> None:
-        if self.scene != SceneState.PLAY:
+            if self._cena == SceneState.GAME_OVER:
+                if evento.type == pg.KEYDOWN:
+                    self._world.reset()
+                    self._cena = SceneState.PLAY
+                    self._pausado = False
+                continue
+
+            if not self._pausado:
+                self._input.processar_evento(evento)
+
+    def _pausar_ou_sair(self) -> None:
+        if self._cena == SceneState.PLAY:
+            self._pausado = not self._pausado
+        else:
+            self._encerrar()
+
+    def _atualizar(self, dt: float) -> None:
+        if self._cena != SceneState.PLAY or self._pausado:
             return
 
-        commands = self.input_mapper.build_commands()
-        self.world.update(dt, commands)
+        comandos = self._input.gerar_comandos()
+        self._world.update(dt, comandos)
 
-        if self.world.game_over:
-            self.scene = SceneState.GAME_OVER
+        if self._world.game_over:
+            self._cena = SceneState.GAME_OVER
+            self._pausado = False
 
-    def _draw(self) -> None:
-        self.renderer.clear()
+    def _renderizar(self) -> None:
+        self._renderer.limpar()
 
-        if self.scene == SceneState.MENU:
-            self.renderer.draw_menu()
-        elif self.scene == SceneState.GAME_OVER:
-            self.renderer.draw_game_over(self.world)
+        if self._cena == SceneState.MENU:
+            self._renderer.desenhar_menu(self._input.status_joysticks())
+        elif self._cena == SceneState.GAME_OVER:
+            self._renderer.desenhar_fim_de_jogo(self._world)
         else:
-            self.renderer.draw_world(self.world)
-            self.renderer.draw_hud(self.world)
+            self._renderer.desenhar_mundo(self._world)
+            self._renderer.desenhar_hud(self._world)
+            if self._pausado:
+                self._renderer.desenhar_pausa()
 
         pg.display.flip()
 
-    def _quit(self) -> None:
-        self.running = False
+    def _encerrar(self) -> None:
+        self._rodando = False
         pg.quit()
         sys.exit(0)
