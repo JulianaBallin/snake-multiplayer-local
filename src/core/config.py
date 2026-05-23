@@ -19,15 +19,14 @@ WHITE = (240, 240, 240)
 FOOD_COLOR = (200, 60, 60)
 GRID_COLOR = (20, 20, 20)
 
-# Ciano, Amarelo, Verde, Vermelho -- mesmas cores do Asteroids Multiplayer Local
 PLAYER_COLORS = {
-    1: (0, 220, 220),
+    1: (60, 120, 255),
     2: (220, 220, 0),
     3: (0, 220, 80),
     4: (220, 60, 60),
 }
 PLAYER_HEAD_COLORS = {
-    1: (0, 150, 150),
+    1: (40, 80, 200),
     2: (160, 160, 0),
     3: (0, 160, 60),
     4: (160, 40, 40),
@@ -35,6 +34,7 @@ PLAYER_HEAD_COLORS = {
 
 FONT_SIZE = 20
 FONT_SIZE_BIG = 64
+FONT_SIZE_SMALL = 14
 FONT_NAME = "consolas"
 
 # (posicao_inicial, direcao_inicial) por jogador

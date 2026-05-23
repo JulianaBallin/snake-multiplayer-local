@@ -1,9 +1,4 @@
-"""Loop do jogo e transicao de cenas.
-
-- InputMapper converte eventos do teclado em PlayerCommand.
-- World atualiza a simulacao e gera eventos para Game reagir.
-- Game gerencia transicoes de cena e renderizacao.
-"""
+"""Loop do jogo e transicao de cenas."""
 
 import sys
 
@@ -26,9 +21,12 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
-        font = pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE)
-        big = pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_BIG)
-        self.renderer = Renderer(self.screen, fonts={"font": font, "big": big})
+        fontes = {
+            "normal": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE),
+            "grande": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_BIG),
+            "pequena": pg.font.SysFont(C.FONT_NAME, C.FONT_SIZE_SMALL),
+        }
+        self.renderer = Renderer(self.screen, fontes=fontes)
 
         self.scene = SceneState.MENU
         self.world = World()
@@ -75,15 +73,15 @@ class Game:
             self.scene = SceneState.GAME_OVER
 
     def _draw(self) -> None:
-        self.renderer.clear()
+        self.renderer.limpar()
 
         if self.scene == SceneState.MENU:
-            self.renderer.draw_menu()
+            self.renderer.desenhar_menu(self.input_mapper.status_joysticks())
         elif self.scene == SceneState.GAME_OVER:
-            self.renderer.draw_game_over(self.world)
+            self.renderer.desenhar_fim_de_jogo(self.world)
         else:
-            self.renderer.draw_world(self.world)
-            self.renderer.draw_hud(self.world)
+            self.renderer.desenhar_mundo(self.world)
+            self.renderer.desenhar_hud(self.world)
 
         pg.display.flip()
 
