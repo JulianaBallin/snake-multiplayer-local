@@ -1,6 +1,6 @@
 """Constantes de configuracao do jogo Snake."""
 
-CELL = 20
+CELL = 27
 COLS = 40
 ROWS = 30
 WIDTH = COLS * CELL
