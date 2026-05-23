@@ -5,7 +5,7 @@ LAYOUT_WITH_LEGEND()
 
 title Diagrama de Container - Snake Multiplayer Local (Nivel 2)
 
-Person(jogadores, "Jogadores (J1 e J2)", "Dois jogadores no mesmo teclado")
+Person(jogadores, "Jogadores (J1 a J4)", "Ate quatro jogadores no mesmo teclado")
 
 System_Boundary(sistema, "Snake Multiplayer Local") {
     Container(main, "main.py", "Python", "Ponto de entrada da aplicacao:\ninstancia e executa Game")
