@@ -5,15 +5,13 @@ LAYOUT_WITH_LEGEND()
 
 title Diagrama de Contexto - Snake Multiplayer Local (Nivel 1)
 
-Person(j1, "Jogador 1", "Controla a cobra ciano\nusando as teclas WASD")
-Person(j2, "Jogador 2", "Controla a cobra amarela\nusando as setas direcionais")
+Person(jogadores, "Jogadores Locais (J1 a J4)", "Controla a cobra em 4 direcoes e navega\nentre menu, jogo e pausa.\nAte 4 jogadores no mesmo computador.\nEntrada: teclado ou joystick.")
 
-System(snake, "Snake Multiplayer Local", "Jogo da cobrinha para dois\njogadores no mesmo teclado,\ndesenvolvido em Python com pygame")
+System(snake, "Snake Multiplayer Local", "Jogo da cobrinha para ate 4 jogadores\nno mesmo computador, desenvolvido\nem Python com pygame.")
 
-System_Ext(pygame, "pygame", "Biblioteca de jogos 2D para Python:\njanela, captura de input e renderizacao")
+System_Ext(so, "Sistema Operacional + Pygame/SDL", "Gerencia a janela do jogo, captura\neventos de teclado e joystick\ne renderiza o jogo em 2D via SDL.")
 
-Rel(j1, snake, "Joga", "Teclado (WASD)")
-Rel(j2, snake, "Joga", "Teclado (Setas)")
-Rel(snake, pygame, "Usa", "API pygame")
+Rel(jogadores, snake, "Enviam comandos de jogo", "teclado ou joystick")
+Rel(snake, so, "Usa", "API pygame / SDL")
 
 @enduml
