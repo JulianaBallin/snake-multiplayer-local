@@ -37,6 +37,8 @@ FONT_SIZE_BIG = 64
 FONT_SIZE_SMALL = 14
 FONT_NAME = "consolas"
 
+JOY_BTNS_PAUSE = (9,)
+
 # (posicao_inicial, direcao_inicial) por jogador
 PLAYER_STARTS: dict[int, tuple[tuple[int, int], tuple[int, int]]] = {
     1: ((5, ROWS // 2), (1, 0)),                   # esquerda, vai para direita

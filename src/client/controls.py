@@ -2,6 +2,7 @@
 
 import pygame as pg
 
+from core import config as C
 from core.commands import PlayerCommand
 
 _CIMA = (0, -1)
@@ -59,6 +60,7 @@ class InputMapper:
         pg.joystick.init()
         self._joysticks: dict[int, pg.joystick.JoystickType] = {}
         self._buffer: dict[int, tuple[int, int] | None] = {pid: None for pid in KEYMAPS}
+        self._pausar_pendente = False
         self._inicializar_joysticks()
 
     def processar_evento(self, event: pg.event.Event) -> None:
@@ -70,6 +72,11 @@ class InputMapper:
         comandos = {pid: PlayerCommand(direction=self._buffer[pid]) for pid in KEYMAPS}
         self._buffer = {pid: None for pid in KEYMAPS}
         return comandos
+
+    def consumir_pausa(self) -> bool:
+        acionado = self._pausar_pendente
+        self._pausar_pendente = False
+        return acionado
 
     def status_joysticks(self) -> dict[int, str | None]:
         status: dict[int, str | None] = {pid: None for pid in KEYMAPS}
@@ -112,6 +119,8 @@ class InputMapper:
             direcao = _hat_para_direcao(event.value)
             if direcao:
                 self._buffer[pid] = direcao
+        if event.type == pg.JOYBUTTONDOWN and event.button in C.JOY_BTNS_PAUSE:
+            self._pausar_pendente = True
 
     def _processar_analogicos(self) -> None:
         for joy_id, joy in self._joysticks.items():

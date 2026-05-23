@@ -10,6 +10,9 @@ _MARGEM_COMIDA = 4
 _RAIO_BORDA = 5
 _RAIO_PAINEL = 8
 _COR_PAINEL_BG = (12, 12, 12)
+_PAINEL_W = 372
+_PAINEL_H = 184
+_PAINEL_GAP = 24
 
 _LAYOUTS: dict[int, list[tuple[str, int, int]]] = {
     1: [("I", 1, 0), ("J", 0, 1), ("K", 1, 1), ("L", 2, 1)],
@@ -59,15 +62,27 @@ class Renderer:
     def desenhar_menu(self, status_joy: dict[int, str | None]) -> None:
         cx = C.WIDTH // 2
 
+        grid_w = _PAINEL_W * 2 + _PAINEL_GAP
+        grid_h = _PAINEL_H * 2 + _PAINEL_GAP
+        grid_x = (C.WIDTH - grid_w) // 2
+        grid_y = (C.HEIGHT - grid_h) // 2
+
         titulo = self._fonte_grande.render("SNAKE", True, C.WHITE)
-        self._tela.blit(titulo, (cx - titulo.get_width() // 2, 14))
+        self._tela.blit(titulo, (cx - titulo.get_width() // 2, grid_y - 108))
 
         sub = self._fonte.render(
             "MULTIPLAYER LOCAL  \u2014  4 JOGADORES", True, (140, 140, 140)
         )
-        self._tela.blit(sub, (cx - sub.get_width() // 2, 93))
+        self._tela.blit(sub, (cx - sub.get_width() // 2, grid_y - 48))
 
-        posicoes = [(1, 15, 126), (2, 413, 126), (3, 15, 320), (4, 413, 320)]
+        col2 = grid_x + _PAINEL_W + _PAINEL_GAP
+        row2 = grid_y + _PAINEL_H + _PAINEL_GAP
+        posicoes = [
+            (1, grid_x, grid_y),
+            (2, col2, grid_y),
+            (3, grid_x, row2),
+            (4, col2, row2),
+        ]
         for pid, px, py in posicoes:
             self._desenhar_painel(pid, px, py, status_joy.get(pid))
 
@@ -83,8 +98,9 @@ class Renderer:
         lbl_start = self._fonte.render(
             "Pressione qualquer tecla para iniciar", True, C.WHITE
         )
-        self._tela.blit(lbl_joy, (cx - lbl_joy.get_width() // 2, 519))
-        self._tela.blit(lbl_start, (cx - lbl_start.get_width() // 2, 556))
+        rodape_y = grid_y + grid_h + 28
+        self._tela.blit(lbl_joy, (cx - lbl_joy.get_width() // 2, rodape_y))
+        self._tela.blit(lbl_start, (cx - lbl_start.get_width() // 2, rodape_y + 37))
 
     def desenhar_fim_de_jogo(self, world: object) -> None:
         cx = C.WIDTH // 2
@@ -137,11 +153,25 @@ class Renderer:
         )
         self._tela.blit(lbl_r, (cx - lbl_r.get_width() // 2, y + 22))
 
+    def desenhar_pausa(self) -> None:
+        overlay = pg.Surface((C.WIDTH, C.HEIGHT), pg.SRCALPHA)
+        overlay.fill((0, 0, 0, 150))
+        self._tela.blit(overlay, (0, 0))
+
+        cx = C.WIDTH // 2
+        cy = C.HEIGHT // 2
+
+        titulo = self._fonte_grande.render("PAUSADO", True, C.WHITE)
+        sub = self._fonte.render("Pressione ESC para continuar", True, (170, 170, 170))
+
+        self._tela.blit(titulo, (cx - titulo.get_width() // 2, cy - 55))
+        self._tela.blit(sub, (cx - sub.get_width() // 2, cy + 25))
+
     def _desenhar_painel(
         self, pid: int, x: int, y: int, joy_nome: str | None
     ) -> None:
         cor = C.PLAYER_COLORS[pid]
-        w, h = 372, 184
+        w, h = _PAINEL_W, _PAINEL_H
 
         pg.draw.rect(self._tela, _COR_PAINEL_BG, (x, y, w, h), border_radius=_RAIO_PAINEL)
         pg.draw.rect(self._tela, cor, (x, y, w, h), width=2, border_radius=_RAIO_PAINEL)

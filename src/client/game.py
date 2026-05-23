@@ -12,14 +12,13 @@ from client.renderer import Renderer
 
 
 class Game:
-    """Orquestra input -> update -> draw."""
 
     def __init__(self) -> None:
         pg.init()
-
         self._tela = pg.display.set_mode((C.WIDTH, C.HEIGHT))
         self._relogio = pg.time.Clock()
         self._rodando = True
+        self._pausado = False
 
         pg.display.set_caption("Snake Multiplayer Local")
 
@@ -48,23 +47,40 @@ class Game:
                 self._encerrar()
 
             if evento.type == pg.KEYDOWN and evento.key == pg.K_ESCAPE:
-                self._encerrar()
+                self._pausar_ou_sair()
+                continue
+
+            if evento.type == pg.JOYBUTTONDOWN:
+                self._input.processar_evento(evento)
+
+            if self._input.consumir_pausa():
+                self._pausar_ou_sair()
+                continue
 
             if self._cena == SceneState.MENU:
                 if evento.type == pg.KEYDOWN:
                     self._cena = SceneState.PLAY
+                    self._pausado = False
                 continue
 
             if self._cena == SceneState.GAME_OVER:
                 if evento.type == pg.KEYDOWN:
                     self._world.reset()
                     self._cena = SceneState.PLAY
+                    self._pausado = False
                 continue
 
-            self._input.processar_evento(evento)
+            if not self._pausado:
+                self._input.processar_evento(evento)
+
+    def _pausar_ou_sair(self) -> None:
+        if self._cena == SceneState.PLAY:
+            self._pausado = not self._pausado
+        else:
+            self._encerrar()
 
     def _atualizar(self, dt: float) -> None:
-        if self._cena != SceneState.PLAY:
+        if self._cena != SceneState.PLAY or self._pausado:
             return
 
         comandos = self._input.gerar_comandos()
@@ -72,6 +88,7 @@ class Game:
 
         if self._world.game_over:
             self._cena = SceneState.GAME_OVER
+            self._pausado = False
 
     def _renderizar(self) -> None:
         self._renderer.limpar()
@@ -83,6 +100,8 @@ class Game:
         else:
             self._renderer.desenhar_mundo(self._world)
             self._renderer.desenhar_hud(self._world)
+            if self._pausado:
+                self._renderer.desenhar_pausa()
 
         pg.display.flip()
 
