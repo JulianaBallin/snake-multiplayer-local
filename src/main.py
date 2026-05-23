@@ -2,7 +2,7 @@ from client.game import Game
 
 
 def main() -> None:
-    Game().run()
+    Game().rodar()
 
 
 if __name__ == "__main__":
