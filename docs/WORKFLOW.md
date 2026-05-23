@@ -29,10 +29,7 @@ Responsável pela **estrutura do projeto, camada de domínio e documentação ba
 
 | PR | Branch | Escopo |
 |----|--------|--------|
-| 1 | `feat/estrutura-base` | `main.py`, `requirements.txt`, `.gitignore`, estrutura de pastas (`src/core/`, `src/client/`, `docs/`) |
-| 2 | `feat/core-infra` | `core/config.py`, `core/commands.py`, `core/scene.py`, `core/utils.py` |
-| 3 | `feat/core-entidades-mundo` | `core/entities.py` (Snake, Food), `core/world.py` (tick, colisões, pontuação) |
-| 4 | `chore/docs-readme-nivel2` | `README.md`, `LICENSE`, `docs/WORKFLOW.md`, `docs/diagrams/c4_nivel2_container.puml` |
+| 1 | `feat/infraestrutura-base` | `main.py`, `requirements.txt`, `.gitignore`, estrutura de pastas (`src/core/`, `src/client/`, `docs/`), `core/config.py`, `core/commands.py`, `core/scene.py`, `core/utils.py`, `core/entities.py` (Snake, Food), `core/world.py` (tick, colisões, pontuação), `README.md`, `LICENSE`, `docs/WORKFLOW.md`, `docs/diagrams/c4_nivel2_container.puml` |
 
 ### Fernando Luiz Da Silva Freire: Camada de apresentação e Diagrama C4 Nível 1 (Contexto)
 
@@ -59,14 +56,14 @@ Responsável por uma **mecânica inédita** no jogo e pelo diagrama de component
 ## 4. Ordem de Implementação Sugerida
 
 ```
-PR 1 (Juliana) -> PR 2 (Juliana) -> PR 3 (Juliana) -> PR 4 (Juliana)
-                                                              |
-                                          +-------------------+-------------------+
-                                          |                                       |
-                               PR 5-8 (Fernando)                       PR 9-10 (Ana)
+PR 1 (Juliana: feat/infraestrutura-base)
+              |
++-------------+-------------+
+|                           |
+PR 2-5 (Fernando)    PR 6-7 (Ana)
 ```
 
-Fernando pode iniciar PR 5 assim que PR 3 for mesclado (os arquivos `core/` já estão disponíveis). Ana pode iniciar PR 9 a qualquer momento após PR 3.
+Fernando pode iniciar seu PR assim que o PR 1 de Juliana for mesclado. Ana pode iniciar a qualquer momento após o PR 1.
 
 ---
 
