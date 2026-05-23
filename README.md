@@ -51,10 +51,10 @@ Comer o maior número de alimentos possível sem colidir com paredes, com o pró
 
 | Jogador | Cima | Baixo | Esquerda | Direita |
 |---------|------|-------|----------|---------|
-| **J1 (Ciano)** | `W` | `S` | `A` | `D` |
-| **J2 (Amarelo)** | `↑` | `↓` | `←` | `→` |
-| **J3 (Verde)** | `I` | `K` | `J` | `L` |
-| **J4 (Vermelho)** | `Num8` | `Num2` | `Num4` | `Num6` |
+| **J1 (Azul)** | `I` | `K` | `J` | `L` |
+| **J2 (Amarelo)** | `Num8` | `Num2` | `Num4` | `Num6` |
+| **J3 (Verde)** | `W` | `S` | `A` | `D` |
+| **J4 (Vermelho)** | `↑` | `↓` | `←` | `→` |
 
 `ESC` encerra o jogo a qualquer momento.
 
