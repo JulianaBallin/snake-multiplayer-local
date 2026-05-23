@@ -62,13 +62,13 @@ class Game:
                 continue
 
             if self.scene == SceneState.PLAY:
-                self.input_mapper.handle_event(event)
+                self.input_mapper.processar_evento(event)
 
     def _update(self, dt: float) -> None:
         if self.scene != SceneState.PLAY:
             return
 
-        commands = self.input_mapper.build_commands()
+        commands = self.input_mapper.gerar_comandos()
         self.world.update(dt, commands)
 
         if self.world.game_over:
