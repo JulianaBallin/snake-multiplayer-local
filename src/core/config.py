@@ -46,3 +46,13 @@ PLAYER_STARTS: dict[int, tuple[tuple[int, int], tuple[int, int]]] = {
     3: ((COLS // 4, ROWS // 4), (0, 1)),            # canto superior esquerdo, vai para baixo
     4: ((3 * COLS // 4, 3 * ROWS // 4), (0, -1)),  # canto inferior direito, vai para cima
 }
+
+# Configuracoes do poder "Sticky Trail"
+STICKY_ACTIVE_DURATION = 5.0
+STICKY_GOO_DURATION = 10.0
+STICKY_ATTRACTION_RADIUS = 4
+STICKY_SLOW_CYCLE = 5
+STICKY_SLOW_SKIPPED_TICKS = 2
+
+STICKY_COLOR = (150, 60, 220)
+STICKY_ORB_COLOR = (190, 80, 255)
