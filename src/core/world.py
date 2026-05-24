@@ -45,11 +45,19 @@ class World:
         if self.game_over:
             return
 
+        self._update_sticky_timers(dt)
+
         for pid, cmd in commands.items():
             snake = self.snakes.get(pid)
 
-            if snake and snake.alive and cmd.direction:
+            if not snake or not snake.alive:
+                continue
+
+            if cmd.direction:
                 snake.set_direction(cmd.direction)
+
+            if cmd.activate_sticky:
+                self._activate_sticky_trail(snake)
 
         self.tick_timer -= dt
 
@@ -58,6 +66,25 @@ class World:
 
         self.tick_timer += float(C.TICK_INTERVAL)
         self._tick()
+
+    def _update_sticky_timers(self, dt: float) -> None:
+        for snake in self.snakes.values():
+            if snake.sticky_active_timer > 0:
+                snake.sticky_active_timer = max(
+                    0.0,
+                    snake.sticky_active_timer - dt,
+                )
+
+    def _activate_sticky_trail(self, snake: Snake) -> None:
+        if snake.sticky_charges <= 0:
+            return
+
+        if snake.sticky_active_timer > 0:
+            return
+
+        snake.sticky_charges -= 1
+        snake.sticky_active_timer = C.STICKY_ACTIVE_DURATION
+        self.events.append("sticky_activated")
 
     def _ocupadas(self) -> set[tuple[int, int]]:
         celulas: set[tuple[int, int]] = set()
