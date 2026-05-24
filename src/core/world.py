@@ -5,7 +5,7 @@ from typing import Dict
 
 from core import config as C
 from core.commands import PlayerCommand
-from core.entities import Food, PlayerId, Snake
+from core.entities import Food, PlayerId, Snake, StickyGoo
 from core.utils import celula_aleatoria_livre
 
 
@@ -19,6 +19,7 @@ class World:
     def __init__(self) -> None:
         self.snakes: Dict[PlayerId, Snake] = {}
         self.foods: list[Food] = []
+        self.sticky_goos: list[StickyGoo] = []
         self.scores: Dict[PlayerId, int] = {}
         self.tick_timer = float(C.TICK_INTERVAL)
         self.events: list[str] = []
@@ -46,6 +47,7 @@ class World:
             return
 
         self._update_sticky_timers(dt)
+        self._update_sticky_goos(dt)
 
         for pid, cmd in commands.items():
             snake = self.snakes.get(pid)
@@ -75,6 +77,13 @@ class World:
                     snake.sticky_active_timer - dt,
                 )
 
+    def _update_sticky_goos(self, dt: float) -> None:
+        for goo in list(self.sticky_goos):
+            goo.lifetime -= dt
+
+            if goo.lifetime <= 0:
+                self.sticky_goos.remove(goo)
+
     def _activate_sticky_trail(self, snake: Snake) -> None:
         if snake.sticky_charges <= 0:
             return
@@ -85,6 +94,27 @@ class World:
         snake.sticky_charges -= 1
         snake.sticky_active_timer = C.STICKY_ACTIVE_DURATION
         self.events.append("sticky_activated")
+
+    def _add_sticky_goo(
+        self,
+        pos: tuple[int, int],
+        owner_id: PlayerId,
+    ) -> None:
+        for goo in self.sticky_goos:
+            if goo.pos == pos and goo.owner_id == owner_id:
+                goo.lifetime = C.STICKY_GOO_DURATION
+                return
+
+        self.sticky_goos.append(
+            StickyGoo(pos, owner_id, C.STICKY_GOO_DURATION)
+        )
+
+    def _spawn_sticky_trail(self, snake: Snake) -> None:
+        if snake.sticky_active_timer <= 0:
+            return
+
+        for pos in snake.body:
+            self._add_sticky_goo(pos, snake.player_id)
 
     def _ocupadas(self) -> set[tuple[int, int]]:
         celulas: set[tuple[int, int]] = set()
@@ -112,6 +142,7 @@ class World:
         for snake in self.snakes.values():
             if snake.alive:
                 snake.move()
+                self._spawn_sticky_trail(snake)
 
         for snake in self.snakes.values():
             if not snake.alive:
