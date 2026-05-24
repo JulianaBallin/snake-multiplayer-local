@@ -3,6 +3,7 @@
 from collections import deque
 from typing import Deque
 
+
 PlayerId = int
 
 
@@ -21,8 +22,14 @@ class Snake:
         self.alive = True
         self.grow = 0
 
+        # Estado da mecânica Rastro Grudento.
+        self.sticky_charges = 0
+        self.sticky_active_timer = 0.0
+        self.slow_tick_counter = 0
+
         col, row = start
         dx, dy = direction
+
         self.body: Deque[tuple[int, int]] = deque(
             (col - dx * i, row - dy * i) for i in range(length)
         )
@@ -34,13 +41,16 @@ class Snake:
     def set_direction(self, direction: tuple[int, int]) -> None:
         dx, dy = direction
         cx, cy = self.direction
+
         if (dx, dy) != (-cx, -cy):
             self.direction = (dx, dy)
 
     def move(self) -> None:
         hx, hy = self.head
         dx, dy = self.direction
+
         self.body.appendleft((hx + dx, hy + dy))
+
         if self.grow > 0:
             self.grow -= 1
         else:
@@ -50,5 +60,20 @@ class Snake:
 class Food:
     """Comida que aparece no tabuleiro."""
 
-    def __init__(self, pos: tuple[int, int]) -> None:
+    def __init__(self, pos: tuple[int, int], kind: str = "normal") -> None:
         self.pos = pos
+        self.kind = kind
+
+
+class StickyGoo:
+    """Gosma deixada pelo Rastro Grudento."""
+
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        owner_id: PlayerId,
+        lifetime: float,
+    ) -> None:
+        self.pos = pos
+        self.owner_id = owner_id
+        self.lifetime = lifetime

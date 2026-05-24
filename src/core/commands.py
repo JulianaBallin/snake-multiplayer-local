@@ -8,3 +8,4 @@ class PlayerCommand:
     """Comando enviado por um jogador a cada frame."""
 
     direction: tuple[int, int] | None = None
+    activate_sticky: bool = False
