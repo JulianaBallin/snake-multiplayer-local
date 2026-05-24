@@ -60,8 +60,9 @@ class Snake:
 class Food:
     """Comida que aparece no tabuleiro."""
 
-    def __init__(self, pos: tuple[int, int]) -> None:
+    def __init__(self, pos: tuple[int, int], kind: str = "normal") -> None:
         self.pos = pos
+        self.kind = kind
 
 
 class StickyGoo:
