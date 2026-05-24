@@ -116,6 +116,84 @@ class World:
         for pos in snake.body:
             self._add_sticky_goo(pos, snake.player_id)
 
+    def _is_inside_board(self, pos: tuple[int, int]) -> bool:
+        col, row = pos
+
+        return 0 <= col < C.COLS and 0 <= row < C.ROWS
+
+    def _is_on_enemy_sticky_goo(self, snake: Snake) -> bool:
+        return any(
+            goo.pos == snake.head and goo.owner_id != snake.player_id
+            for goo in self.sticky_goos
+        )
+
+    def _should_skip_move_by_sticky_slow(self, snake: Snake) -> bool:
+        if not self._is_on_enemy_sticky_goo(snake):
+            snake.slow_tick_counter = 0
+            return False
+
+        snake.slow_tick_counter = (
+            snake.slow_tick_counter + 1
+        ) % C.STICKY_SLOW_CYCLE
+
+        return snake.slow_tick_counter < C.STICKY_SLOW_SKIPPED_TICKS
+
+    def _nearest_sticky_goo(
+        self,
+        pos: tuple[int, int],
+    ) -> StickyGoo | None:
+        px, py = pos
+        nearest = None
+        nearest_dist = None
+
+        for goo in self.sticky_goos:
+            gx, gy = goo.pos
+            dist = abs(px - gx) + abs(py - gy)
+
+            if dist > C.STICKY_ATTRACTION_RADIUS:
+                continue
+
+            if nearest_dist is None or dist < nearest_dist:
+                nearest = goo
+                nearest_dist = dist
+
+        return nearest
+
+    def _move_foods_toward_sticky_goos(self) -> None:
+        occupied_by_snakes = set()
+
+        for snake in self.snakes.values():
+            occupied_by_snakes.update(snake.body)
+
+        occupied_by_foods = {food.pos for food in self.foods}
+
+        for food in self.foods:
+            goo = self._nearest_sticky_goo(food.pos)
+
+            if goo is None:
+                continue
+
+            fx, fy = food.pos
+            gx, gy = goo.pos
+
+            dx = 1 if gx > fx else -1 if gx < fx else 0
+            dy = 1 if gy > fy else -1 if gy < fy else 0
+
+            new_pos = (fx + dx, fy + dy)
+
+            if not self._is_inside_board(new_pos):
+                continue
+
+            if new_pos in occupied_by_snakes:
+                continue
+
+            if new_pos in occupied_by_foods and new_pos != food.pos:
+                continue
+
+            occupied_by_foods.discard(food.pos)
+            food.pos = new_pos
+            occupied_by_foods.add(food.pos)
+
     def _ocupadas(self) -> set[tuple[int, int]]:
         celulas: set[tuple[int, int]] = set()
 
@@ -140,9 +218,17 @@ class World:
 
     def _tick(self) -> None:
         for snake in self.snakes.values():
-            if snake.alive:
-                snake.move()
-                self._spawn_sticky_trail(snake)
+            if not snake.alive:
+                continue
+
+            if self._should_skip_move_by_sticky_slow(snake):
+                self.events.append("sticky_slow")
+                continue
+
+            snake.move()
+            self._spawn_sticky_trail(snake)
+
+        self._move_foods_toward_sticky_goos()
 
         for snake in self.snakes.values():
             if not snake.alive:
