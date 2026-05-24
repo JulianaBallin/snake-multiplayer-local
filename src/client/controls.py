@@ -12,6 +12,7 @@ _ESQUERDA = (-1, 0)
 _DIREITA = (1, 0)
 
 _DEADZONE = 0.5
+JOY_BTN_STICKY = 0
 
 
 KEYMAPS: dict[int, dict[int, tuple[int, int]]] = {
@@ -174,9 +175,19 @@ class InputMapper:
 
             if direcao:
                 self._buffer[pid] = direcao
+            return
 
-        if event.type == pg.JOYBUTTONDOWN and event.button in C.JOY_BTNS_PAUSE:
-            self._pausar_pendente = True
+        if event.type == pg.JOYBUTTONDOWN:
+            pid = self._slot_do_joystick(event.joy)
+
+            if pid is None:
+                return
+
+            if event.button == JOY_BTN_STICKY:
+                self._sticky_buffer[pid] = True
+
+            if event.button in C.JOY_BTNS_PAUSE:
+                self._pausar_pendente = True
 
     def _processar_analogicos(self) -> None:
         for joy_id, joy in self._joysticks.items():
