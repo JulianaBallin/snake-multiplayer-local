@@ -49,14 +49,24 @@ Comer o maior número de alimentos possível sem colidir com paredes, com o pró
 
 <h2 align="center">Controles</h2>
 
-| Jogador | Cima | Baixo | Esquerda | Direita |
-|---------|------|-------|----------|---------|
-| **J1 (Azul)** | `I` | `K` | `J` | `L` |
-| **J2 (Amarelo)** | `Num8` | `Num2` | `Num4` | `Num6` |
-| **J3 (Verde)** | `W` | `S` | `A` | `D` |
-| **J4 (Vermelho)** | `↑` | `↓` | `←` | `→` |
+| Jogador | Cima | Baixo | Esquerda | Direita | Rastro Grudento |
+|---------|------|-------|----------|---------|-----------------|
+| **J1 (Azul)** | `I` | `K` | `J` | `L` | `U` |
+| **J2 (Amarelo)** | `Num8` | `Num2` | `Num4` | `Num6` | `Num7` |
+| **J3 (Verde)** | `W` | `S` | `A` | `D` | `Q` |
+| **J4 (Vermelho)** | `↑` | `↓` | `←` | `→` | `RCtrl` |
 
-`ESC` encerra o jogo a qualquer momento.
+`ESC` pausa o jogo (na tela de menu ou fim de jogo, encerra).
+
+**Controle (joystick)**
+
+| Acao | Entrada |
+|------|---------|
+| Movimento | D-pad ou analógico esquerdo |
+| Rastro Grudento | Botão 0 (X ou A) |
+| Pausar | Botão Options / Start |
+
+Até 4 controles simultâneos. Conexão e desconexão durante o jogo são reconhecidas automaticamente.
 
 ---
 
@@ -64,19 +74,22 @@ Comer o maior número de alimentos possível sem colidir com paredes, com o pró
 
 ```text
 snake-multiplayer-local/
+├── assets/
+│   └── sounds/              # efeitos sonoros (.wav)
 ├── src/
 │   ├── main.py              # ponto de entrada
 │   ├── core/
 │   │   ├── config.py        # constantes, cores e posições iniciais
 │   │   ├── commands.py      # PlayerCommand (direção por frame)
-│   │   ├── entities.py      # Snake (corpo, direção, crescimento) e Food
+│   │   ├── entities.py      # Snake (corpo, direção, crescimento), Food e StickyGoo
 │   │   ├── world.py         # estado do jogo, tick, colisões e pontuação
 │   │   ├── scene.py         # enum SceneState
 │   │   └── utils.py         # células livres e posição aleatória
 │   └── client/
 │       ├── game.py          # loop principal e transições de cena
 │       ├── renderer.py      # renderização de entidades e HUD
-│       └── controls.py      # mapeamento de teclas para PlayerCommand
+│       ├── controls.py      # mapeamento de teclado e joystick para PlayerCommand
+│       └── audio.py         # carregamento e reprodução de efeitos sonoros
 ├── docs/
 │   └── diagrams/
 │       ├── logo.svg
@@ -136,8 +149,9 @@ A arquitetura segue o mesmo padrão do projeto Asteroids Singleplayer:
 | Camada | Pacote | Responsabilidade |
 |--------|--------|------------------|
 | Domínio | `core/` | Toda a lógica do jogo: entidades, mundo, colisões e regras. Sem dependência de pygame. |
-| Apresentação | `client/` | Loop do jogo, renderização e mapeamento de input. Depende de pygame e de `core/`. |
-| Entrada | `main.py` | Ponto de entrada mínimo que instancia `Game` e chama `run()`. |
+| Apresentação | `client/` | Loop do jogo, renderização, mapeamento de input e áudio. Depende de pygame e de `core/`. |
+| Assets | `assets/sounds/` | Efeitos sonoros em .wav reutilizados do projeto asteroids_single-player. |
+| Entrada | `main.py` | Ponto de entrada mínimo que instancia `Game` e chama `rodar()`. |
 
 O isolamento do domínio permite testar a lógica do jogo sem inicializar display ou áudio.
 
@@ -159,8 +173,7 @@ Para renderizar, use o [PlantUML Online Server](https://www.plantuml.com/plantum
 
 <h2 align="center">Limitações</h2>
 
-- Até 4 jogadores simultâneos no mesmo teclado.
-- Sem suporte a joystick ou controle externo.
+- Até 4 jogadores simultâneos (teclado ou joystick, no mesmo computador).
 - Sem salvamento de pontuação entre partidas.
 
 ---

@@ -7,6 +7,7 @@ import pygame as pg
 from core import config as C
 from core.scene import SceneState
 from core.world import World
+from client.audio import AudioManager
 from client.controls import InputMapper
 from client.renderer import Renderer
 
@@ -30,6 +31,7 @@ class Game:
 
         self._renderer = Renderer(self._tela, fontes)
         self._input = InputMapper()
+        self._audio = AudioManager()
         self._world = World()
         self._cena = SceneState.MENU
 
@@ -85,6 +87,9 @@ class Game:
 
         comandos = self._input.gerar_comandos()
         self._world.update(dt, comandos)
+
+        for evento in self._world.events:
+            self._audio.tocar(evento)
 
         if self._world.game_over:
             self._cena = SceneState.GAME_OVER
